@@ -43,3 +43,5 @@ joblib.dump(model, f"{MODEL_DIR}/model.pkl")
 metrics = {"mse": mse, "r2_score": r2}
 with open(f"{RESULTS_DIR}/metrics.json", "w") as f:
     json.dump(metrics, f, indent=4)
+from sklearn.linear_model import Lasso
+model = Lasso(alpha=0.1)
