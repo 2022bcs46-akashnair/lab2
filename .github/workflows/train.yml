@@ -1,0 +1,48 @@
+name: ML Training Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Train model
+      run: |
+        python train.py
+
+    - name: Add metrics to Job Summary
+      run: |
+        echo "## Model Evaluation Metrics" >> $GITHUB_STEP_SUMMARY
+        echo "**MSE:**" >> $GITHUB_STEP_SUMMARY
+        jq '.mse' output/results/metrics.json >> $GITHUB_STEP_SUMMARY
+        echo "**R2 Score:**" >> $GITHUB_STEP_SUMMARY
+        jq '.r2_score' output/results/metrics.json >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload model artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: trained-model
+        path: output/model/
+
+    - name: Upload metrics artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: evaluation-results
+        path: output/results/
